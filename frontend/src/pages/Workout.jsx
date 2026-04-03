@@ -219,15 +219,24 @@ export default function Workout() {
     }
   }, [captureFrameBase64, exerciseType, showSkeleton, repChimeOn]);
 
-  useEffect(() => {
-    //if (!running) return;
+  // useEffect(() => {
+  //   //if (!running) return;
   
+  //   const interval = setInterval(() => {
+  //     sendFrame();
+  //   }, 800);
+  
+  //   return () => clearInterval(interval);
+  // }, [running, sendFrame]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
+      console.log("API CALL 🚀"); // debug
       sendFrame();
     }, 800);
   
     return () => clearInterval(interval);
-  }, [running, sendFrame]);
+  }, [sendFrame]);
 
   const openCamera = useCallback(
     async (facingMode, { resetSession }) => {
