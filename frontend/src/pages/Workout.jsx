@@ -220,7 +220,7 @@ export default function Workout() {
   }, [captureFrameBase64, exerciseType, showSkeleton, repChimeOn]);
 
   useEffect(() => {
-    if (!running) return;
+    //if (!running) return;
   
     const interval = setInterval(() => {
       sendFrame();
