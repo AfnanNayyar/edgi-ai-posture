@@ -1,12 +1,10 @@
 import cv2
 import mediapipe as mp
-from mediapipe.python.solutions import pose
-from mediapipe.python.solutions import drawing_utils
 
 
 class PoseDetector:
     def __init__(self):
-        self.mp_pose = pose
+        self.mp_pose = mp.solutions.pose
         self.pose = self.mp_pose.Pose(
             static_image_mode=False,
             model_complexity=1,
@@ -14,7 +12,7 @@ class PoseDetector:
             min_detection_confidence=0.5,
             min_tracking_confidence=0.5,
         )
-        self.mp_drawing = drawing_utils
+        self.mp_drawing = mp.solutions.drawing_utils
 
     def detect_pose(self, frame, draw_landmarks: bool = False):
         frame = cv2.flip(frame, 1)  # mirror for consistency
