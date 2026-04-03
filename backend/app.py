@@ -24,7 +24,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from ai_engine.exercises.pushup import PushUp
 from ai_engine.exercises.squat import Squat
 from ai_engine.form_scoring import compute_form_score
-from ai_engine.pose_detector import PoseDetector
 from ai_engine.pushup_posture import user_message_for_pose_reason
 
 logger = logging.getLogger(__name__)
@@ -35,9 +34,35 @@ JWT_SECRET = os.environ.get("JWT_SECRET", "dev-change-me-in-production")
 JWT_ALGO = "HS256"
 JWT_EXP_DAYS = 7
 
-_pose_detector = PoseDetector()
+_pose_detector = None
+_pose_detector_error: Exception | None = None
 MAX_SESSION_EXERCISES = 256
 _session_exercises: OrderedDict[str, PushUp | Squat] = OrderedDict()
+
+
+def _get_pose_detector():
+    """
+    Lazy-load Mediapipe pose detector.
+
+    This keeps `gunicorn app:app` from failing hard at import time if Mediapipe
+    has transient install/runtime issues; the `/ai/process-frame` endpoint will
+    surface the failure as a 500 instead.
+    """
+    global _pose_detector, _pose_detector_error
+    if _pose_detector is not None:
+        return _pose_detector
+    if _pose_detector_error is not None:
+        raise _pose_detector_error
+
+    try:
+        # Local import: avoids importing Mediapipe during app startup.
+        from ai_engine.pose_detector import PoseDetector
+
+        _pose_detector = PoseDetector()
+        return _pose_detector
+    except Exception as e:
+        _pose_detector_error = e
+        raise
 
 
 def _get_session_exercise(key: str, exercise_type: str) -> PushUp | Squat:
@@ -416,10 +441,11 @@ def process_frame():
         return jsonify({"error": "Invalid or empty image (base64 required)"}), 400
 
     try:
-        annotated, results = _pose_detector.detect_pose(
+        detector = _get_pose_detector()
+        annotated, results = detector.detect_pose(
             frame, draw_landmarks=draw_pose
         )
-        landmarks = _pose_detector.get_landmarks(results)
+        landmarks = detector.get_landmarks(results)
     except Exception:
         logger.exception("pose detection failed")
         return jsonify({"error": "Pose processing failed"}), 500

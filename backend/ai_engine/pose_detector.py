@@ -34,6 +34,12 @@ class PoseDetector:
             return results.pose_landmarks.landmark
         return None
 
-    def _del_(self):
-        if hasattr(self, "pose") and self.pose:
-            self.pose.close()
+    def __del__(self):
+        """Best-effort cleanup of MediaPipe native resources."""
+        try:
+            pose = getattr(self, "pose", None)
+            if pose is not None:
+                pose.close()
+        except Exception:
+            # Destructors must never raise.
+            pass

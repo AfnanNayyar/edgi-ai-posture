@@ -1,0 +1,15 @@
+flask==3.0.3
+flask-cors==4.0.1
+PyJWT==2.10.1
+gunicorn==21.2.0
+
+# Mediapipe + NumPy are the most sensitive to Python/OS mismatches on Render.
+# Pin NumPy to a version range Mediapipe wheels are known to work with.
+numpy==1.26.4
+
+opencv-python-headless>=4.8.0.76,<5
+mediapipe==0.10.14
+
+# Mediapipe depends on protobuf; keep it in the range that works with the
+# pinned mediapipe wheel to avoid runtime import errors.
+protobuf>=3.20.2,<4
