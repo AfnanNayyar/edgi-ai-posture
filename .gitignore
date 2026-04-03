@@ -1,0 +1,33 @@
+# Virtual Environments
+gym_env/
+venv/
+
+# Python cache
+_pycache_/
+*.pyc
+
+# Build files
+build/
+dist/
+*.egg-info/
+
+# Node (VERY IMPORTANT)
+node_modules/
+frontend/node_modules/
+
+# ML Models (optional)
+*.pt
+*.pth
+*.h5
+*.onnx
+*.pkl
+
+# Data
+*.csv
+*.zip
+
+# OS files
+.DS_Store
+
+# Env
+.env
