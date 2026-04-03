@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api/client";
 import { isMobileDevice } from "../utils/device";
 import { playRepChime } from "../utils/repChime";
-import { useEffect } from "react";
+
 
 const CAPTURE_MS = 120;
 const SOUND_STORAGE_KEY = "workout_rep_chime";
