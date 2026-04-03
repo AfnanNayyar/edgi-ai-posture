@@ -1,4 +1,4 @@
-import axios, { CanceledError } from "axios";
+import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api/client";
 import { isMobileDevice } from "../utils/device";
@@ -77,7 +77,6 @@ export default function Workout() {
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
   const intervalRef = useRef(null);
-  const frameAbortRef = useRef(null);
   const lastRepsRef = useRef(0);
   const feedbackNonceRef = useRef(0);
   const desktopAutoStartedRef = useRef(false);
@@ -118,8 +117,6 @@ export default function Workout() {
   }, []);
 
   const stopSession = useCallback(() => {
-    frameAbortRef.current?.abort();
-    frameAbortRef.current = null;
     if (intervalRef.current != null) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -134,7 +131,7 @@ export default function Workout() {
   const captureFrameBase64 = useCallback(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (!video || !canvas) return null;
+    if (!video || !canvas || video.readyState < 2) return null;
     const w = video.videoWidth;
     const h = video.videoHeight;
     if (!w || !h) return null;
@@ -148,12 +145,13 @@ export default function Workout() {
 
   const isSendingRef = useRef(false);
   const sendFrame = useCallback(async () => {
-    if (isSendingRef.current) return; // 🚫 prevent spam
+    if (isSendingRef.current) return;
     isSendingRef.current = true;
     const image = captureFrameBase64();
-    if (!image) return;
-
-
+    if (!image) {
+      isSendingRef.current = false;
+      return;
+    }
 
     setApiError("");
     try {
@@ -163,8 +161,7 @@ export default function Workout() {
         draw_pose: showSkeleton,
         ...(sessionIdRef.current ? { session_id: sessionIdRef.current } : {}),
       };
-      const { data } = await api.post("/ai/process-frame", body, {
-      });
+      const { data } = await api.post("/ai/process-frame", body);
       if (data.session_id) sessionIdRef.current = data.session_id;
       if (data.reps != null && !Number.isNaN(Number(data.reps))) {
         lastRepsRef.current = Math.max(0, Math.floor(Number(data.reps)));
@@ -208,35 +205,16 @@ export default function Workout() {
         typeof data.preview_image === "string" ? data.preview_image : null
       );
     } catch (e) {
-      if (e instanceof CanceledError) return;
-      if (axios.isAxiosError(e) && e.code === "ERR_CANCELED") return;
       if (axios.isAxiosError(e)) {
         const msg = e.response?.data?.error || e.message || "Request failed";
         setApiError(msg);
       } else {
         setApiError("Something went wrong");
       }
+    } finally {
+      isSendingRef.current = false;
     }
   }, [captureFrameBase64, exerciseType, showSkeleton, repChimeOn]);
-
-  // useEffect(() => {
-  //   //if (!running) return;
-  
-  //   const interval = setInterval(() => {
-  //     sendFrame();
-  //   }, 800);
-  
-  //   return () => clearInterval(interval);
-  // }, [running, sendFrame]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      console.log("API CALL 🚀"); // debug
-      sendFrame();
-    }, 1500);
-  
-    return () => clearInterval(interval);
-  }, [sendFrame]);
 
   const openCamera = useCallback(
     async (facingMode, { resetSession }) => {
