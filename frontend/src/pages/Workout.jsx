@@ -134,7 +134,7 @@ export default function Workout() {
   const captureFrameBase64 = useCallback(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (!video || !canvas || video.readyState < 2) return null;
+    if (!video || !canvas) return null;
     const w = video.videoWidth;
     const h = video.videoHeight;
     if (!w || !h) return null;
@@ -146,13 +146,14 @@ export default function Workout() {
     return canvas.toDataURL("image/jpeg", 0.85);
   }, []);
 
+  const isSendingRef = useRef(false);
   const sendFrame = useCallback(async () => {
+    if (isSendingRef.current) return; // 🚫 prevent spam
+    isSendingRef.current = true;
     const image = captureFrameBase64();
     if (!image) return;
 
-    frameAbortRef.current?.abort();
-    const controller = new AbortController();
-    frameAbortRef.current = controller;
+
 
     setApiError("");
     try {
@@ -163,7 +164,6 @@ export default function Workout() {
         ...(sessionIdRef.current ? { session_id: sessionIdRef.current } : {}),
       };
       const { data } = await api.post("/ai/process-frame", body, {
-        signal: controller.signal,
       });
       if (data.session_id) sessionIdRef.current = data.session_id;
       if (data.reps != null && !Number.isNaN(Number(data.reps))) {
@@ -233,7 +233,7 @@ export default function Workout() {
     const interval = setInterval(() => {
       console.log("API CALL 🚀"); // debug
       sendFrame();
-    }, 800);
+    }, 1500);
   
     return () => clearInterval(interval);
   }, [sendFrame]);
