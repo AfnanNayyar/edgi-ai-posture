@@ -293,6 +293,9 @@ app = Flask(__name__)
 CORS(app)
 init_db()
 
+@app.route("/")
+def home():
+    return "🚀AI Posture Backend is Live!"
 
 @app.errorhandler(404)
 def not_found(_e):
