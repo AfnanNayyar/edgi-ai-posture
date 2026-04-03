@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api/client";
 import { isMobileDevice } from "../utils/device";
 import { playRepChime } from "../utils/repChime";
+import { useEffect } from "react";
 
 const CAPTURE_MS = 120;
 const SOUND_STORAGE_KEY = "workout_rep_chime";
@@ -217,6 +218,16 @@ export default function Workout() {
       }
     }
   }, [captureFrameBase64, exerciseType, showSkeleton, repChimeOn]);
+
+  useEffect(() => {
+    if (!running) return;
+  
+    const interval = setInterval(() => {
+      sendFrame();
+    }, 800);
+  
+    return () => clearInterval(interval);
+  }, [running, sendFrame]);
 
   const openCamera = useCallback(
     async (facingMode, { resetSession }) => {
