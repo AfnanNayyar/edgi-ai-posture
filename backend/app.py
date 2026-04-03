@@ -32,18 +32,6 @@ from ai_engine.exercises.pushup import PushUp
 from ai_engine.exercises.squat import Squat
 from ai_engine.form_scoring import compute_form_score
 from ai_engine.pushup_posture import user_message_for_pose_reason
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 logger = logging.getLogger(__name__)
 

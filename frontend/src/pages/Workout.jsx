@@ -266,6 +266,7 @@ export default function Workout() {
           setFeedbackKind("neutral");
           setApiError("");
           sessionIdRef.current = null;
+          setFeedback("Tracking…");
         }
 
         if (intervalRef.current == null) {
