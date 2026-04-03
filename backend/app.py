@@ -13,6 +13,7 @@ from collections import OrderedDict
 from datetime import datetime, timedelta, timezone
 from functools import wraps
 from pathlib import Path
+import sys
 
 import cv2
 import jwt
@@ -21,6 +22,12 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from werkzeug.security import check_password_hash, generate_password_hash
 
+# Ensure imports like `from ai_engine...` work no matter where gunicorn
+# is launched from (Render commonly launches from the repo root).
+BASE_DIR = Path(__file__).resolve().parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+
 from ai_engine.exercises.pushup import PushUp
 from ai_engine.exercises.squat import Squat
 from ai_engine.form_scoring import compute_form_score
@@ -28,7 +35,6 @@ from ai_engine.pushup_posture import user_message_for_pose_reason
 
 logger = logging.getLogger(__name__)
 
-BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "fitness_coach.db"
 JWT_SECRET = os.environ.get("JWT_SECRET", "dev-change-me-in-production")
 JWT_ALGO = "HS256"
