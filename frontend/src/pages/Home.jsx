@@ -115,16 +115,15 @@ export default function Home() {
           </div>
           <div className="relative mt-10 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-800/50 to-slate-900/80 shadow-2xl shadow-indigo-950/50">
             <div className="aspect-video w-full">
-              <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-gradient-to-br from-slate-800/90 via-slate-900 to-slate-950 p-8">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 text-slate-950 shadow-lg shadow-emerald-500/30">
-                  <svg className="ml-1 h-8 w-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </div>
-                <p className="text-center text-sm font-medium text-slate-400">
-                  Demo video — embed your player or <span className="text-emerald-400">MP4</span> here
-                </p>
-              </div>
+              <video
+                className="h-full w-full object-cover"
+                src="/demo.mp4"
+                controls
+                autoPlay
+                muted
+                loop
+                playsInline
+              />
             </div>
             <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/5" aria-hidden />
           </div>
